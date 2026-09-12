@@ -109,3 +109,5 @@ export function SuccessScreen({
     </div>
   );
 }
+
+export default SuccessScreen;

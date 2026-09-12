@@ -78,3 +78,5 @@ export function Industries() {
     </section>
   );
 }
+
+export default Industries;

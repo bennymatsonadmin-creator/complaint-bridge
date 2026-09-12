@@ -56,3 +56,5 @@ export function WhyComplaintBridge() {
     </section>
   );
 }
+
+export default WhyComplaintBridge;

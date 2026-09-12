@@ -85,3 +85,5 @@ export function FloatingContactBar() {
     </div>
   );
 }
+
+export default FloatingContactBar;

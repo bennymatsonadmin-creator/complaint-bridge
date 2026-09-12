@@ -578,3 +578,5 @@ export function ComplaintForm() {
     </form>
   );
 }
+
+export default ComplaintForm;

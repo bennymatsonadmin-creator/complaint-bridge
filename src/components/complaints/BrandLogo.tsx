@@ -12,3 +12,5 @@ export function BrandLogo() {
     </a>
   );
 }
+
+export default BrandLogo;
