@@ -1,5 +1,5 @@
 import { Facebook, Linkedin, Instagram, Twitter } from "lucide-react";
-import BrandLogo from "./BrandLogo";
+import { BrandLogo } from "./BrandLogo";
 
 const navLinks = [
   { label: "Home", href: "#home" },
