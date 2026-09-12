@@ -67,7 +67,7 @@ export function Header() {
             className="gap-2 border-green-600 text-green-700 hover:bg-green-50"
           >
             <a
-              href="https://wa.me/447727185736"
+              href="https://wa.me/447727185736?text=Hello%20Pissed%20Consumer%20Support%2C%20I%20would%20like%20assistance%20with%20a%20complaint."
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -120,7 +120,7 @@ export function Header() {
                 variant="outline"
                 className="gap-2 border-green-600 text-green-700"
               >
-                <a href="https://wa.me/447727185736" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/447727185736?text=Hello%20Pissed%20Consumer%20Support%2C%20I%20would%20like%20assistance%20with%20a%20complaint." target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="h-4 w-4" />
                   Chat on WhatsApp
                 </a>

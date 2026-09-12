@@ -61,7 +61,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://wa.me/447727185736"
+                  href="https://wa.me/447727185736?text=Hello%20Pissed%20Consumer%20Support%2C%20I%20would%20like%20assistance%20with%20a%20complaint."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 hover:text-white transition-colors"
