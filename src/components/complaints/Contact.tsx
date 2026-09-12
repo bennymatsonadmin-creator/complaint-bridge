@@ -20,28 +20,28 @@ export function Contact() {
             <div className="space-y-4 text-sm text-gray-600">
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-teal" />
-                <a href="tel:+447853169761" className="hover:text-primary transition-colors">
-                  +44 7853 169761
+                <a href="tel:+447727185736" className="hover:text-primary transition-colors">
+                  +44 7727 185736
                 </a>
               </div>
               <div className="flex items-center gap-3">
                 <MessageCircle className="h-5 w-5 text-teal" />
                 <a
-                  href="https://wa.me/447853169761"
+                  href="https://wa.me/447727185736"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-teal transition-colors"
                 >
-                  WhatsApp +44 7853 169761
+                  WhatsApp +44 7727 185736
                 </a>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-teal" />
                 <a
-                  href="mailto:info@complaintsbridge.company"
+                  href="mailto:info@complaintbridge.website"
                   className="hover:text-primary transition-colors"
                 >
-                  info@complaintsbridge.company
+                  info@complaintbridge.website
                 </a>
               </div>
             </div>

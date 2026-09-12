@@ -28,7 +28,7 @@ export function FloatingContactBar() {
         <div className="flex items-center justify-between bg-white border-t border-gray-200 shadow-lg px-4 py-3">
           <div className="flex items-center gap-4">
             <a
-              href="https://wa.me/447853169761"
+              href="https://wa.me/447727185736"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-green-700 font-medium"
@@ -37,7 +37,7 @@ export function FloatingContactBar() {
               Chat on WhatsApp
             </a>
             <a
-              href="tel:+447853169761"
+              href="tel:+447727185736"
               className="flex items-center gap-2 text-primary font-medium"
             >
               <Phone className="h-5 w-5" />
@@ -58,7 +58,7 @@ export function FloatingContactBar() {
       <div className="hidden md:block fixed bottom-6 right-6">
         <div className="flex flex-col gap-3">
           <a
-            href="https://wa.me/447853169761"
+            href="https://wa.me/447727185736"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-full bg-green-600 px-4 py-3 text-white font-medium shadow-lg hover:bg-green-700 transition-all duration-200"
@@ -67,7 +67,7 @@ export function FloatingContactBar() {
             <span>Chat on WhatsApp</span>
           </a>
           <a
-            href="tel:+447853169761"
+            href="tel:+447727185736"
             className="flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-white font-medium shadow-lg hover:bg-primary/90 transition-all duration-200"
           >
             <Phone className="h-5 w-5" />

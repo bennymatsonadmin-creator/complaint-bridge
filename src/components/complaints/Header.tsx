@@ -67,7 +67,7 @@ export function Header() {
             className="gap-2 border-green-600 text-green-700 hover:bg-green-50"
           >
             <a
-              href="https://wa.me/447853169761"
+              href="https://wa.me/447727185736"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -80,7 +80,7 @@ export function Header() {
             size="sm"
             className="gap-2 bg-primary text-white hover:bg-primary/90"
           >
-            <a href="tel:+447853169761">
+            <a href="tel:+447727185736">
               <Phone className="h-4 w-4" />
               Call Now
             </a>
@@ -120,13 +120,13 @@ export function Header() {
                 variant="outline"
                 className="gap-2 border-green-600 text-green-700"
               >
-                <a href="https://wa.me/447853169761" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/447727185736" target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="h-4 w-4" />
                   Chat on WhatsApp
                 </a>
               </Button>
               <Button asChild className="gap-2 bg-primary text-white">
-                <a href="tel:+447853169761">
+                <a href="tel:+447727185736">
                   <Phone className="h-4 w-4" />
                   Call Now
                 </a>

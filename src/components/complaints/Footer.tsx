@@ -1,4 +1,4 @@
-import { Facebook, Linkedin, Instagram, Twitter } from "lucide-react";
+import { Facebook, Linkedin, Instagram, Twitter, Mail, Phone, MessageCircle } from "lucide-react";
 import { BrandLogo } from "./BrandLogo";
 
 const navLinks = [
@@ -16,7 +16,7 @@ export function Footer() {
       <div className="container-custom section-padding">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <BrandLogo />
+            <BrandLogo light />
             <p className="mt-4 text-sm text-gray-300">
               One place to raise any complaint.
             </p>
@@ -40,28 +40,34 @@ export function Footer() {
 
           <div>
             <h3 className="font-Poppins font-semibold mb-4">Contact Details</h3>
-            <ul className="space-y-2 text-sm text-gray-300">
+            <ul className="space-y-3 text-sm text-gray-300">
               <li>
-                <a href="tel:+447853169761" className="hover:text-white transition-colors">
-                  +44 7853 169761
+                <a
+                  href="mailto:info@complaintbridge.website"
+                  className="flex items-center gap-3 hover:text-white transition-colors"
+                >
+                  <Mail className="h-4 w-4 shrink-0 text-teal" />
+                  info@complaintbridge.website
                 </a>
               </li>
               <li>
                 <a
-                  href="https://wa.me/447853169761"
+                  href="tel:+447727185736"
+                  className="flex items-center gap-3 hover:text-white transition-colors"
+                >
+                  <Phone className="h-4 w-4 shrink-0 text-teal" />
+                  +44 7727 185736
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://wa.me/447727185736"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
+                  className="flex items-center gap-3 hover:text-white transition-colors"
                 >
-                  WhatsApp +44 7853 169761
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:info@complaintsbridge.company"
-                  className="hover:text-white transition-colors"
-                >
-                  info@complaintsbridge.company
+                  <MessageCircle className="h-4 w-4 shrink-0 text-teal" />
+                  WhatsApp +44 7727 185736
                 </a>
               </li>
             </ul>

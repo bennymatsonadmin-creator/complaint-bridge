@@ -77,18 +77,18 @@ export function SuccessScreen({
           <strong>Please save this reference.</strong> You'll need it to track your complaint.
         </p>
         <p className="mt-2">
-          <strong>Manual Submission:</strong> If you don't receive confirmation within 5 minutes, please email your case reference to <a href="mailto:info@complaintsbridge.company" className="font-medium underline">info@complaintsbridge.company</a> with your complaint details.
+          <strong>Manual Submission:</strong> If you don't receive confirmation within 5 minutes, please email your case reference to <a href="mailto:info@complaintbridge.website" className="font-medium underline">info@complaintbridge.website</a> with your complaint details.
         </p>
       </div>
 
       <div className="text-center text-sm text-gray-600">
         Questions?{" "}
-        <a href="tel:+447853169761" className="font-medium text-primary underline">
-          Call +44 7853 169761
+        <a href="tel:+447727185736" className="font-medium text-primary underline">
+          Call +44 7727 185736
         </a>{" "}
         or{" "}
         <a
-          href="https://wa.me/447853169761"
+          href="https://wa.me/447727185736"
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-teal underline"
