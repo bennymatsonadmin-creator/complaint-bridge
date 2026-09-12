@@ -39,7 +39,7 @@ export function Hero() {
             </Button>
           </div>
           <p className="text-sm text-gray-500">
-            Independent complaint resolution with a case reference and tracked progress.
+            Affiliated complaint resolution with a case reference and tracked progress.
           </p>
         </div>
 

@@ -16,10 +16,8 @@ import {
 } from "./complaintData";
 import { SuccessScreen } from "./SuccessScreen";
 
-// Replace with your form backend endpoint (EmailJS, custom API, or mailto)
-const FORM_ENDPOINT = "YOUR_BACKEND_ENDPOINT_HERE";
-// Replace with your email address: info@complaintsbridge.company
-const FORM_EMAIL = "info@complaintsbridge.company";
+// Submissions are emailed via FormSubmit (https://formsubmit.co) to this inbox
+const FORM_ENDPOINT = "https://formsubmit.co/ajax/rastaaman254@gmail.com";
 
 interface FormData {
   fullName: string;
@@ -219,7 +217,11 @@ export function ComplaintForm() {
     safeSetItem("complaintBridgeCaseReference", reference);
 
     const payload = {
+      _subject: `New Complaint Submission — ${reference}`,
+      _template: "table",
+      _captcha: "false",
       ...formData,
+      industry: selectedIndustryName || formData.industry,
       caseReference: reference,
       timestamp: new Date().toISOString(),
       sourceUrl: window.location.href,
@@ -227,20 +229,17 @@ export function ComplaintForm() {
 
     let delivered = true;
 
-    if (FORM_ENDPOINT && FORM_ENDPOINT !== "YOUR_BACKEND_ENDPOINT_HERE") {
-      try {
-        const response = await fetch(FORM_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) delivered = false;
-      } catch {
-        delivered = false;
-      }
-    } else {
-      // Fallback: prepare email payload for manual sending
-      // The user can copy the reference and email the details to info@complaintsbridge.company
+    try {
+      const response = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) delivered = false;
+    } catch {
       delivered = false;
     }
 
