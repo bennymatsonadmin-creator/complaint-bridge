@@ -112,8 +112,8 @@ export function Footer() {
 
         <div className="mt-10 border-t border-white/10 pt-6 text-sm text-gray-300">
           <p>
-            ComplaintBridge is an independent complaint platform and is not
-            affiliated with the companies listed on this site.
+            ComplaintBridge is a complaint platform affiliated with the
+            companies listed on this site.
           </p>
           <p className="mt-2">
             © {new Date().getFullYear()} ComplaintBridge. All rights reserved.
