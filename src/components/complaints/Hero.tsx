@@ -1,3 +1,4 @@
+import { CheckCircle2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Hero() {
@@ -44,16 +45,38 @@ export function Hero() {
         </div>
 
         <div className="relative hidden lg:block">
-          <div className="relative aspect-square max-w-lg mx-auto">
-            <img
-              src="https://images.unsplash.com/photo-1581092921465-6a5f1f1c0e3a?auto=format&fit=crop&w=800&q=80"
-              alt="Professional customer service representative helping a customer with paperwork"
-              className="rounded-2xl shadow-2xl object-cover w-full h-full"
-              loading="eager"
-            />
-            <div className="absolute -bottom-6 -left-6 rounded-xl bg-white p-4 shadow-lg">
-              <p className="text-sm font-semibold text-gray-900">Case Reference</p>
-              <p className="text-lg font-bold text-teal">CB-2609-48213</p>
+          <div className="relative mx-auto max-w-lg">
+            {/* Brand illustration */}
+            <div className="aspect-square overflow-hidden rounded-2xl shadow-2xl">
+              <img
+                src="/assets/hero-customer-service.png"
+                alt="Illustration of a customer service specialist resolving a complaint"
+                className="h-full w-full object-cover"
+                loading="eager"
+              />
+            </div>
+
+            {/* Status chip — top right of the visual */}
+            <div className="absolute -top-4 right-6 flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-lg">
+              <CheckCircle2 className="h-4 w-4 text-teal" />
+              <span className="text-sm font-medium text-gray-900">
+                Routed to the right company
+              </span>
+            </div>
+
+            {/* Case reference card — attached to the bottom-left of the visual */}
+            <div className="absolute -bottom-6 -left-6 flex items-center gap-3 rounded-xl bg-white p-4 shadow-lg">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal/10 text-teal">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500">
+                  Case Reference
+                </p>
+                <p className="text-lg font-bold text-teal font-Poppins">
+                  CB-2609-48213
+                </p>
+              </div>
             </div>
           </div>
         </div>
