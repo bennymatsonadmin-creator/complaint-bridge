@@ -4,76 +4,57 @@ import {
   ShoppingBag,
   Gift,
   Hotel,
-  Laptop,
+  Monitor,
   Truck,
   Zap,
-  ArrowRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { industries } from "./complaintData";
+  Globe,
+} from 'lucide-react';
+import { industries } from './complaintData';
 
-const iconMap = {
-  plane: Plane,
-  shirt: Shirt,
-  "shopping-bag": ShoppingBag,
-  gift: Gift,
-  hotel: Hotel,
-  laptop: Laptop,
-  truck: Truck,
-  zap: Zap,
+const iconMap: Record<string, React.ElementType> = {
+  Airlines: Plane,
+  Clothing: Shirt,
+  Retail: ShoppingBag,
+  Vouchers: Gift,
+  Travel: Hotel,
+  Electronics: Monitor,
+  Delivery: Truck,
+  Utilities: Zap,
 };
 
 export function Industries() {
   return (
-    <section id="industries" className="section-padding bg-white">
-      <div className="container-custom">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl font-Poppins">
+    <section id="industries" className="section-padding bg-[#FAFAFA]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-[#1E3A5F] sm:text-4xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
             Industries We Cover
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
-            File a complaint in any industry — we'll route it to the right place.
+          <p className="mt-4 text-lg text-[#4B5563]">
+            We handle complaints across a wide range of industries. Don't see yours? You can still submit under "Other".
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {industries.map((industry) => {
-            const Icon = iconMap[industry.icon as keyof typeof iconMap];
+            const Icon = iconMap[industry.value] || Globe;
             return (
-              <a
-                key={industry.id}
-                href="#submit-complaint"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const el = document.getElementById("submit-complaint");
-                  if (el) el.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="group card cursor-pointer hover:shadow-lg"
-              >
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal/10 text-teal transition-colors group-hover:bg-teal group-hover:text-white">
-                  <Icon className="h-6 w-6" />
+              <div key={industry.value} className="card p-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#0D9488]/10 text-[#0D9488]">
+                  <Icon className="h-6 w-6" aria-hidden="true" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 font-Poppins">
-                  {industry.name}
-                </h3>
-                <p className="text-sm text-gray-600">{industry.description}</p>
-                <span className="mt-3 inline-flex items-center text-sm font-medium text-teal transition-transform group-hover:translate-x-1">
-                  File a complaint <ArrowRight className="ml-1 h-4 w-4" />
-                </span>
-              </a>
+                <h3 className="text-lg font-semibold text-[#1E3A5F]">{industry.label}</h3>
+                <p className="mt-2 text-sm text-[#4B5563]">
+                  File a complaint against any company in this industry. We'll route it to the right place.
+                </p>
+              </div>
             );
           })}
         </div>
 
-        <div className="mt-8 rounded-xl bg-gray-50 p-6 text-center">
-          <p className="text-gray-600">
-            <strong>Don't see your industry?</strong> You can still submit a complaint under{" "}
-            <a href="#submit-complaint" className="font-medium text-teal underline">
-              "Other"
-            </a>
-            .
-          </p>
-        </div>
+        <p className="mt-8 text-center text-sm text-[#6B7280]">
+          Don't see your industry? You can still submit a complaint under "Other".
+        </p>
       </div>
     </section>
   );

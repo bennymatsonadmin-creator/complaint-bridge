@@ -1,196 +1,129 @@
 export interface Industry {
-  id: string;
-  name: string;
-  icon: string;
-  description: string;
+  value: string;
+  label: string;
   companies: string[];
 }
 
+export interface Country {
+  value: string;
+  label: string;
+}
+
+export interface Outcome {
+  value: string;
+  label: string;
+}
+
+export interface ContactMethod {
+  value: string;
+  label: string;
+}
+
+export interface ContactStatus {
+  value: string;
+  label: string;
+}
+
+// Industry categories with suggested company names
 export const industries: Industry[] = [
   {
-    id: "airlines",
-    name: "Airlines & Flight Issues",
-    icon: "plane",
-    description: "Flight delays, cancellations, lost luggage, and booking problems",
-    companies: [
-      "British Airways",
-      "easyJet",
-      "Ryanair",
-      "Virgin Atlantic",
-      "Emirates",
-      "KLM Royal Dutch Airlines",
-      "Jet2",
-      "TUI Airways",
-      "Wizz Air",
-      "Norwegian Air",
-    ],
+    value: 'Airlines',
+    label: 'Airlines & Flight Issues',
+    companies: ['Delta Air Lines', 'American Airlines', 'United Airlines', 'Ryanair', 'EasyJet', 'British Airways', 'Emirates', 'Qantas', 'Lufthansa', 'Air France'],
   },
   {
-    id: "clothing",
-    name: "Clothing & Fashion Brands",
-    icon: "shirt",
-    description: "Faulty items, sizing issues, returns, and quality concerns",
-    companies: [
-      "Zara",
-      "H&M",
-      "ASOS",
-      "Nike",
-      "Adidas",
-      "Primark",
-      "Next",
-      "Marks & Spencer",
-      "Uniqlo",
-      "Burberry",
-    ],
+    value: 'Clothing',
+    label: 'Clothing & Fashion Brands',
+    companies: ['Nike', 'Adidas', 'H&M', 'Zara', 'Uniqlo', 'Gucci', 'Louis Vuitton', 'Forever 21', 'ASOS', 'Shein'],
   },
   {
-    id: "retail",
-    name: "Retail Stores & Online Shops",
-    icon: "shopping-bag",
-    description: "Product quality, delivery failures, refunds, and customer service",
-    companies: [
-      "Tesco",
-      "Sainsbury's",
-      "Asda",
-      "Morrisons",
-      "Boots",
-      "WHSmith",
-      "Argos",
-      "John Lewis",
-      "IKEA",
-      "B&Q",
-    ],
+    value: 'Retail',
+    label: 'Retail Stores & Online Shops',
+    companies: ['Amazon', 'Walmart', 'Target', 'Best Buy', 'Costco', 'Home Depot', 'eBay', 'AliExpress', 'Macy\'s', 'Nordstrom'],
   },
   {
-    id: "vouchers",
-    name: "Vouchers & Gift Cards",
-    icon: "gift",
-    description: "Expired vouchers, invalid codes, balance issues, and redemption problems",
-    companies: [
-      "Love2shop",
-      "Giftly",
-      "Virgin Experience Days",
-      "Tinggly",
-      "Amazon Gift Card",
-      "One4all",
-      "H&B Gift Cards",
-      "Ticketmaster Gift Card",
-      "M&S Gift Card",
-      "John Lewis Gift Card",
-    ],
+    value: 'Vouchers',
+    label: 'Vouchers & Gift Cards',
+    companies: ['Amazon Gift Card', 'Apple Gift Card', 'Google Play', 'Starbucks', 'Target Gift Card', 'Walmart Gift Card', 'Visa Gift Card', 'Mastercard Gift Card'],
   },
   {
-    id: "travel",
-    name: "Travel, Hotels & Bookings",
-    icon: "hotel",
-    description: "Accommodation issues, overbookings, misleading listings, and cancellation disputes",
-    companies: [
-      "Booking.com",
-      "Expedia",
-      "Airbnb",
-      "TUI",
-      "Jet2holidays",
-      "Hilton",
-      "Marriott",
-      "Premier Inn",
-      "Travelodge",
-      "Holiday Inn",
-    ],
+    value: 'Travel',
+    label: 'Travel, Hotels & Bookings',
+    companies: ['Booking.com', 'Expedia', 'Airbnb', 'Marriott', 'Hilton', 'Hyatt', 'TripAdvisor', 'Kayak', 'Skyscanner'],
   },
   {
-    id: "electronics",
-    name: "Electronics & Appliances",
-    icon: "laptop",
-    description: "Defective products, warranty claims, and technical faults",
-    companies: [
-      "Apple",
-      "Samsung",
-      "Sony",
-      "Dyson",
-      "Currys",
-      "AO.com",
-      "LG",
-      "Bosch",
-      "Philips",
-      "Dell",
-    ],
+    value: 'Electronics',
+    label: 'Electronics & Appliances',
+    companies: ['Apple', 'Samsung', 'Sony', 'LG', 'Bose', 'Dyson', 'Xbox', 'PlayStation', 'Fitbit', 'Garmin'],
   },
   {
-    id: "delivery",
-    name: "Delivery & Courier Services",
-    icon: "truck",
-    description: "Lost parcels, late deliveries, damaged goods, and tracking issues",
-    companies: [
-      "Royal Mail",
-      "DPD",
-      "Evri",
-      "UPS",
-      "FedEx",
-      "DHL",
-      "Yodel",
-      "Amazon Logistics",
-      "Hermes",
-      "Parcelforce",
-    ],
+    value: 'Delivery',
+    label: 'Delivery & Courier Services',
+    companies: ['FedEx', 'UPS', 'DHL', 'USPS', 'Amazon Logistics', 'Royal Mail', 'TNT', 'Aramex'],
   },
   {
-    id: "utilities",
-    name: "Utilities & Subscriptions",
-    icon: "zap",
-    description: "Billing errors, unexpected charges, cancellation difficulties, and service outages",
-    companies: [
-      "British Gas",
-      "EDF Energy",
-      "Octopus Energy",
-      "Thames Water",
-      "Virgin Media",
-      "BT",
-      "Sky",
-      "Netflix",
-      "EE",
-      "O2",
-    ],
+    value: 'Utilities',
+    label: 'Utilities & Subscriptions',
+    companies: ['British Gas', 'E.ON', 'EDF', 'Scottish Power', 'Virgin Media', 'Sky', 'Netflix', 'Spotify', 'Amazon Prime'],
   },
 ];
 
-export const countries = [
-  "United Kingdom",
-  "Ireland",
-  "United States",
-  "Canada",
-  "Australia",
-  "Germany",
-  "France",
-  "Spain",
-  "Italy",
-  "Netherlands",
-  "Sweden",
-  "Norway",
-  "Denmark",
-  "Poland",
-  "South Africa",
-  "India",
-  "Japan",
-  "Brazil",
-  "Mexico",
-  "New Zealand",
+// Common countries for dropdown
+export const countries: Country[] = [
+  { value: 'GB', label: 'United Kingdom (+44)' },
+  { value: 'US', label: 'United States (+1)' },
+  { value: 'CA', label: 'Canada (+1)' },
+  { value: 'AU', label: 'Australia (+61)' },
+  { value: 'DE', label: 'Germany (+49)' },
+  { value: 'FR', label: 'France (+33)' },
+  { value: 'ES', label: 'Spain (+34)' },
+  { value: 'IT', label: 'Italy (+39)' },
+  { value: 'NL', label: 'Netherlands (+31)' },
+  { value: 'SE', label: 'Sweden (+46)' },
+  { value: 'NO', label: 'Norway (+47)' },
+  { value: 'DK', label: 'Denmark (+45)' },
+  { value: 'FI', label: 'Finland (+358)' },
+  { value: 'PL', label: 'Poland (+48)' },
+  { value: 'CH', label: 'Switzerland (+41)' },
+  { value: 'BE', label: 'Belgium (+32)' },
+  { value: 'AT', label: 'Austria (+43)' },
+  { value: 'IE', label: 'Ireland (+353)' },
+  { value: 'PT', label: 'Portugal (+351)' },
+  { value: 'GR', label: 'Greece (+30)' },
+  { value: 'TR', label: 'Turkey (+90)' },
+  { value: 'RU', label: 'Russia (+7)' },
+  { value: 'IN', label: 'India (+91)' },
+  { value: 'CN', label: 'China (+86)' },
+  { value: 'JP', label: 'Japan (+81)' },
+  { value: 'KR', label: 'South Korea (+82)' },
+  { value: 'BR', label: 'Brazil (+55)' },
+  { value: 'MX', label: 'Mexico (+52)' },
+  { value: 'AR', label: 'Argentina (+54)' },
+  { value: 'ZA', label: 'South Africa (+27)' },
 ];
 
-export const outcomeOptions = [
-  "Refund",
-  "Replacement",
-  "Compensation",
-  "Apology",
-  "Fix the Issue",
-  "Escalation to Management",
-  "Other",
+// Outcome sought options
+export const outcomes: Outcome[] = [
+  { value: 'Refund', label: 'Refund' },
+  { value: 'Replacement', label: 'Replacement' },
+  { value: 'Compensation', label: 'Compensation' },
+  { value: 'Apology', label: 'Apology' },
+  { value: 'Fix the Issue', label: 'Fix the Issue' },
+  { value: 'Escalation to Management', label: 'Escalation to Management' },
+  { value: 'Other', label: 'Other' },
 ];
 
-export const contactMethodOptions = ["Email", "Phone", "WhatsApp", "Either"];
+// Contact method options
+export const contactMethods: ContactMethod[] = [
+  { value: 'Email', label: 'Email' },
+  { value: 'Phone', label: 'Phone' },
+  { value: 'WhatsApp', label: 'WhatsApp' },
+  { value: 'Either', label: 'Either' },
+];
 
-export const contactedOptions = ["Yes", "No", "Not sure"];
-
-export function getCompaniesForIndustry(industryId: string): string[] {
-  const industry = industries.find((i) => i.id === industryId);
-  return industry ? industry.companies : [];
-}
+// Contact status options
+export const contactStatuses: ContactStatus[] = [
+  { value: 'Yes', label: 'Yes' },
+  { value: 'No', label: 'No' },
+  { value: 'Not sure', label: 'Not sure' },
+];

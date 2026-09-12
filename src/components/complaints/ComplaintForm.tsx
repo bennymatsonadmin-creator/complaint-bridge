@@ -1,24 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
-import { AlertCircle, Check, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import {
-  industries,
-  countries,
-  outcomeOptions,
-  contactMethodOptions,
-  contactedOptions,
-  getCompaniesForIndustry,
-} from "./complaintData";
-import { SuccessScreen } from "./SuccessScreen";
+import { useState, useEffect, useRef } from 'react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
+import { industries, countries, outcomes, contactMethods, contactStatuses } from './complaintData';
 
 // Replace with your form backend endpoint (EmailJS, custom API, or mailto)
+// Example: const FORM_ENDPOINT = "https://api.emailjs.com/api/v1.0/email/send";
 const FORM_ENDPOINT = "YOUR_BACKEND_ENDPOINT_HERE";
-// Replace with your email address: info@complaintsbridge.company
 const FORM_EMAIL = "info@complaintsbridge.company";
 
 interface FormData {
@@ -32,7 +18,7 @@ interface FormData {
   reference: string;
   dateOfIncident: string;
   amount: string;
-  description: string;
+  whatHappened: string;
   outcome: string;
   contactedCompany: string;
   preferredContact: string;
@@ -40,159 +26,209 @@ interface FormData {
 }
 
 interface FormErrors {
-  [key: string]: string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+  industry?: string;
+  company?: string;
+  reference?: string;
+  dateOfIncident?: string;
+  whatHappened?: string;
+  outcome?: string;
+  consent?: string;
 }
 
-const initialFormData: FormData = {
-  fullName: "",
-  email: "",
-  phone: "",
-  country: "",
-  industry: "",
-  company: "",
-  companyWebsite: "",
-  reference: "",
-  dateOfIncident: "",
-  amount: "",
-  description: "",
-  outcome: "",
-  contactedCompany: "",
-  preferredContact: "",
-  consent: false,
-};
-
-function generateCaseReference(): string {
-  const now = new Date();
-  const year = String(now.getFullYear()).slice(-2);
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const array = new Uint8Array(5);
-  crypto.getRandomValues(array);
-  const random = Array.from(array, (b) => b % 10).join("");
-  return `CB-${year}${month}-${random}`;
-}
-
-function validateEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function validatePhone(phone: string): boolean {
-  return /^\+?[\d\s().-]{7,20}$/.test(phone);
-}
-
-export function ComplaintForm() {
-  const [formData, setFormData] = useState<FormData>(() => {
-    const saved = sessionStorage.getItem("complaintBridgeForm");
-    if (saved) {
-      try {
-        return { ...initialFormData, ...JSON.parse(saved) };
-      } catch {
-        return initialFormData;
-      }
-    }
-    return initialFormData;
+export default function ComplaintForm() {
+  const [formData, setFormData] = useState<FormData>({
+    fullName: '',
+    email: '',
+    phone: '',
+    country: '',
+    industry: '',
+    company: '',
+    companyWebsite: '',
+    reference: '',
+    dateOfIncident: '',
+    amount: '',
+    whatHappened: '',
+    outcome: '',
+    contactedCompany: '',
+    preferredContact: '',
+    consent: false,
   });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [submitted, setSubmitted] = useState(false);
-  const [caseReference, setCaseReference] = useState("");
-  const [deliveryWarning, setDeliveryWarning] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [companySuggestions, setCompanySuggestions] = useState<string[]>([]);
 
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [caseReference, setCaseReference] = useState<string>('');
+  const [deliveryWarning, setDeliveryWarning] = useState(false);
+  const [companySuggestions, setCompanySuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Load saved form data from sessionStorage on mount
   useEffect(() => {
-    const savedRef = sessionStorage.getItem("complaintBridgeCaseReference");
-    if (savedRef) {
-      setCaseReference(savedRef);
-      setSubmitted(true);
+    try {
+      const saved = sessionStorage.getItem('complaintBridgeForm');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setFormData((prev) => ({ ...prev, ...parsed }));
+      }
+      const savedRef = sessionStorage.getItem('complaintBridgeCaseReference');
+      if (savedRef) {
+        setCaseReference(savedRef);
+      }
+    } catch {
+      // Ignore parse errors
     }
   }, []);
 
+  // Save form data to sessionStorage on change
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('complaintBridgeForm', JSON.stringify(formData));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [formData]);
+
+  // Update company suggestions when industry changes
   useEffect(() => {
     if (formData.industry) {
-      setCompanySuggestions(getCompaniesForIndustry(formData.industry));
+      const industry = industries.find((i) => i.value === formData.industry);
+      if (industry) {
+        setCompanySuggestions(industry.companies);
+      }
     } else {
       setCompanySuggestions([]);
     }
+    setFormData((prev) => ({ ...prev, company: '' }));
   }, [formData.industry]);
 
-  useEffect(() => {
-    sessionStorage.setItem("complaintBridgeForm", JSON.stringify(formData));
-  }, [formData]);
+  // Filter suggestions based on input
+  const filteredSuggestions = companySuggestions.filter((company) =>
+    company.toLowerCase().includes(formData.company.toLowerCase())
+  );
 
-  const selectedIndustryName = useMemo(() => {
-    const industry = industries.find((i) => i.id === formData.industry);
-    return industry?.name || "";
-  }, [formData.industry]);
-
-  const validate = (): boolean => {
+  const validate = (): FormErrors => {
     const newErrors: FormErrors = {};
-    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    }
+
     if (!formData.email.trim()) {
-      newErrors.email = "Email address is required";
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
+
     if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = "Please enter a valid phone number";
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\+?[\d\s\-()]{7,}$/.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
     }
-    if (!formData.country) newErrors.country = "Country is required";
-    if (!formData.industry) newErrors.industry = "Industry is required";
-    if (!formData.company.trim()) newErrors.company = "Company name is required";
+
+    if (!formData.country) {
+      newErrors.country = 'Country is required';
+    }
+
+    if (!formData.industry) {
+      newErrors.industry = 'Industry is required';
+    }
+
+    if (!formData.company.trim()) {
+      newErrors.company = 'Which company is your complaint about? is required';
+    }
+
     if (!formData.reference.trim()) {
-      newErrors.reference = "Order / Booking / Voucher Reference is required";
+      newErrors.reference = 'Order/Booking/Voucher reference is required';
     }
+
     if (!formData.dateOfIncident) {
-      newErrors.dateOfIncident = "Date of incident is required";
+      newErrors.dateOfIncident = 'Date of incident is required';
     } else {
-      const selected = new Date(formData.dateOfIncident);
+      const selectedDate = new Date(formData.dateOfIncident);
       const today = new Date();
       today.setHours(23, 59, 59, 999);
-      if (selected > today) {
-        newErrors.dateOfIncident = "Date cannot be in the future";
+      if (selectedDate > today) {
+        newErrors.dateOfIncident = 'Date cannot be in the future';
       }
     }
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    } else if (formData.description.trim().length < 40) {
-      newErrors.description = "Description must be at least 40 characters";
+
+    if (!formData.whatHappened.trim()) {
+      newErrors.whatHappened = 'What happened is required';
+    } else if (formData.whatHappened.trim().length < 40) {
+      newErrors.whatHappened = 'Please provide at least 40 characters';
     }
-    if (!formData.outcome) newErrors.outcome = "Outcome sought is required";
-    if (!formData.contactedCompany)
-      newErrors.contactedCompany = "Please select an option";
-    if (!formData.preferredContact)
-      newErrors.preferredContact = "Please select a preferred contact method";
+
+    if (!formData.outcome) {
+      newErrors.outcome = 'Outcome sought is required';
+    }
+
     if (!formData.consent) {
-      newErrors.consent = "You must confirm the information is accurate";
+      newErrors.consent = 'You must agree to be contacted';
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    return newErrors;
   };
 
   const handleChange = (
-    field: keyof FormData,
-    value: string | boolean
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+    const { name, value, type } = e.target;
+    const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+
+    // Clear error on change
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const newErrors = validate();
+    if (newErrors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: newErrors[name as keyof FormErrors] }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validate()) return;
+    setIsSubmitting(true);
+    setDeliveryWarning(false);
 
-    setSubmitting(true);
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsSubmitting(false);
+      return;
+    }
 
-    const reference = generateCaseReference();
+    // Generate case reference: CB-YYMM-XXXXX
+    const now = new Date();
+    const year = String(now.getFullYear()).slice(-2);
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const randomNum = crypto.getRandomValues(new Uint32Array(1))[0] % 100000;
+    const reference = `CB-${year}${month}-${String(randomNum).padStart(5, '0')}`;
     setCaseReference(reference);
-    sessionStorage.setItem("complaintBridgeCaseReference", reference);
 
+    // Save reference to sessionStorage
+    try {
+      sessionStorage.setItem('complaintBridgeCaseReference', reference);
+    } catch {
+      // Ignore storage errors
+    }
+
+    // Prepare payload
     const payload = {
       ...formData,
       caseReference: reference,
@@ -200,381 +236,541 @@ export function ComplaintForm() {
       sourceUrl: window.location.href,
     };
 
-    let delivered = true;
-
-    if (FORM_ENDPOINT && FORM_ENDPOINT !== "YOUR_BACKEND_ENDPOINT_HERE") {
-      try {
+    // Try to send to backend
+    let success = false;
+    try {
+      if (FORM_ENDPOINT === 'YOUR_BACKEND_ENDPOINT_HERE') {
+        // Fallback: use mailto
+        const mailtoLink = `mailto:${FORM_EMAIL}?subject=New Complaint - ${reference}&body=${encodeURIComponent(JSON.stringify(payload, null, 2))}`;
+        window.location.href = mailtoLink;
+        // Don't navigate away - show success screen anyway
+        success = true;
+      } else {
         const response = await fetch(FORM_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        if (!response.ok) delivered = false;
-      } catch {
-        delivered = false;
+        if (response.ok) {
+          success = true;
+        }
       }
-    } else {
-      // Fallback: prepare email payload for manual sending
-      // The user can copy the reference and email the details to info@complaintsbridge.company
-      delivered = false;
+    } catch {
+      // Backend call failed - still show success screen
+      setDeliveryWarning(true);
+      success = true;
     }
 
-    setDeliveryWarning(!delivered);
-    setSubmitted(true);
-    setSubmitting(false);
+    if (success) {
+      setIsSuccess(true);
+      // Clear saved form data
+      try {
+        sessionStorage.removeItem('complaintBridgeForm');
+      } catch {
+        // Ignore
+      }
+    }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setIsSubmitting(false);
   };
 
-  const handleSubmitAnother = () => {
-    setFormData(initialFormData);
+  const resetForm = () => {
+    setFormData({
+      fullName: '',
+      email: '',
+      phone: '',
+      country: '',
+      industry: '',
+      company: '',
+      companyWebsite: '',
+      reference: '',
+      dateOfIncident: '',
+      amount: '',
+      whatHappened: '',
+      outcome: '',
+      contactedCompany: '',
+      preferredContact: '',
+      consent: false,
+    });
     setErrors({});
-    setSubmitted(false);
-    setCaseReference("");
+    setTouched({});
+    setIsSuccess(false);
+    setCaseReference('');
     setDeliveryWarning(false);
-    sessionStorage.removeItem("complaintBridgeCaseReference");
-    sessionStorage.removeItem("complaintBridgeForm");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setCompanySuggestions([]);
+    setShowSuggestions(false);
+    try {
+      sessionStorage.removeItem('complaintBridgeForm');
+      sessionStorage.removeItem('complaintBridgeCaseReference');
+    } catch {
+      // Ignore
+    }
   };
 
-  if (submitted) {
+  const copyReference = () => {
+    navigator.clipboard.writeText(caseReference).catch(() => {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = caseReference;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    });
+  };
+
+  if (isSuccess) {
     return (
-      <SuccessScreen
-        name={formData.fullName}
-        company={formData.company}
-        caseReference={caseReference}
-        category={selectedIndustryName}
-        dateOfIncident={formData.dateOfIncident}
-        outcomeSought={formData.outcome}
-        onSubmitAnother={handleSubmitAnother}
-      />
+      <div className="rounded-xl bg-white p-8 shadow-lg">
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#0D9488]/10 text-[#0D9488]">
+            <CheckCircle className="h-8 w-8" aria-hidden="true" />
+          </div>
+          <h3 className="text-2xl font-bold text-[#1E3A5F]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            Complaint Submitted Successfully
+          </h3>
+          <p className="mt-2 text-[#4B5563]">
+            Thank you, {formData.fullName}. Your complaint against {formData.company} has been received.
+          </p>
+
+          <div className="mx-auto mt-6 max-w-sm rounded-lg border-2 border-[#0D9488] bg-[#F0FDFA] p-4">
+            <p className="text-sm font-medium text-[#0D9488]">Your Case Reference</p>
+            <p className="mt-1 text-2xl font-bold text-[#1E3A5F]">{caseReference}</p>
+            <button
+              type="button"
+              onClick={copyReference}
+              className="mt-3 rounded-lg bg-[#0D9488] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0A7A70]"
+            >
+              Copy Reference
+            </button>
+          </div>
+
+          <div className="mt-6 grid gap-4 text-left sm:grid-cols-2">
+            <div className="rounded-lg bg-[#FAFAFA] p-4">
+              <p className="text-sm font-medium text-[#6B7280]">Company</p>
+              <p className="mt-1 font-semibold text-[#1E3A5F]">{formData.company}</p>
+            </div>
+            <div className="rounded-lg bg-[#FAFAFA] p-4">
+              <p className="text-sm font-medium text-[#6B7280]">Category</p>
+              <p className="mt-1 font-semibold text-[#1E3A5F]">{formData.industry}</p>
+            </div>
+            <div className="rounded-lg bg-[#FAFAFA] p-4">
+              <p className="text-sm font-medium text-[#6B7280]">Date of Incident</p>
+              <p className="mt-1 font-semibold text-[#1E3A5F]">{formData.dateOfIncident}</p>
+            </div>
+            <div className="rounded-lg bg-[#FAFAFA] p-4">
+              <p className="text-sm font-medium text-[#6B7280]">Outcome Sought</p>
+              <p className="mt-1 font-semibold text-[#1E3A5F]">{formData.outcome}</p>
+            </div>
+          </div>
+
+          {deliveryWarning && (
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-[#FEF3C7] p-4 text-left">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 text-[#F59E0B]" aria-hidden="true" />
+              <p className="text-sm text-[#92400E]">
+                We couldn't confirm delivery — please screenshot this reference for your records.
+              </p>
+            </div>
+          )}
+
+          <p className="mt-4 text-sm text-[#6B7280]">
+            Please save this reference. You'll need it to track your complaint.
+          </p>
+          <p className="mt-1 text-sm text-[#6B7280]">
+            Questions? Call <a href="tel:+447853169761" className="font-semibold text-[#0D9488] hover:underline">+44 7853 169761</a> or{' '}
+            <a href="https://wa.me/447853169761" target="_blank" rel="noreferrer" className="font-semibold text-[#0D9488] hover:underline">
+              WhatsApp us
+            </a>.
+          </p>
+
+          <div className="mt-6 flex flex-wrap justify-center gap-4">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="rounded-lg bg-[#1E3A5F] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#152A44]"
+            >
+              Submit Another Complaint
+            </button>
+            <a href="#home" className="rounded-lg border-2 border-[#1E3A5F] px-6 py-3 font-semibold text-[#1E3A5F] transition-colors hover:bg-[#1E3A5F] hover:text-white">
+              Close
+            </a>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name *</Label>
-          <Input
-            id="fullName"
-            value={formData.fullName}
-            onChange={(e) => handleChange("fullName", e.target.value)}
-            placeholder="e.g., John Smith"
-            className={errors.fullName ? "border-red-500" : ""}
-          />
-          {errors.fullName && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.fullName}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Email Address *</Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleChange("email", e.target.value)}
-            placeholder="e.g., john@example.com"
-            className={errors.email ? "border-red-500" : ""}
-          />
-          {errors.email && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.email}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number *</Label>
-          <Input
-            id="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => handleChange("phone", e.target.value)}
-            placeholder="e.g., +44 7853 169761"
-            className={errors.phone ? "border-red-500" : ""}
-          />
-          {errors.phone && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.phone}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="country">Country *</Label>
-          <select
-            id="country"
-            value={formData.country}
-            onChange={(e) => handleChange("country", e.target.value)}
-            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-              errors.country ? "border-red-500" : ""
-            }`}
-          >
-            <option value="">Select country</option>
-            {countries.map((country) => (
-              <option key={country} value={country}>
-                {country}
-              </option>
-            ))}
-          </select>
-          {errors.country && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.country}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="industry">Industry / Category *</Label>
-          <select
-            id="industry"
-            value={formData.industry}
-            onChange={(e) => handleChange("industry", e.target.value)}
-            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-              errors.industry ? "border-red-500" : ""
-            }`}
-          >
-            <option value="">Select industry</option>
-            {industries.map((industry) => (
-              <option key={industry.id} value={industry.id}>
-                {industry.name}
-              </option>
-            ))}
-          </select>
-          {errors.industry && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.industry}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="company">
-            Which company is your complaint about? *
-          </Label>
-          <Input
-            id="company"
-            list="company-suggestions"
-            value={formData.company}
-            onChange={(e) => handleChange("company", e.target.value)}
-            placeholder="e.g., British Airways"
-            className={errors.company ? "border-red-500" : ""}
-          />
-          <datalist id="company-suggestions">
-            {companySuggestions.map((company) => (
-              <option key={company} value={company} />
-            ))}
-          </datalist>
-          {errors.company && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.company}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="companyWebsite">
-            Company website or contact page (optional)
-          </Label>
-          <Input
-            id="companyWebsite"
-            type="url"
-            value={formData.companyWebsite}
-            onChange={(e) => handleChange("companyWebsite", e.target.value)}
-            placeholder="e.g., https://www.example.com/contact"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="reference">
-            Order / Booking / Voucher Reference *
-          </Label>
-          <Input
-            id="reference"
-            value={formData.reference}
-            onChange={(e) => handleChange("reference", e.target.value)}
-            placeholder="e.g., ABC-123456"
-            className={errors.reference ? "border-red-500" : ""}
-          />
-          {errors.reference && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.reference}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dateOfIncident">Date of Incident *</Label>
-          <Input
-            id="dateOfIncident"
-            type="date"
-            value={formData.dateOfIncident}
-            onChange={(e) => handleChange("dateOfIncident", e.target.value)}
-            className={errors.dateOfIncident ? "border-red-500" : ""}
-          />
-          {errors.dateOfIncident && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.dateOfIncident}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="amount">Amount involved (optional)</Label>
-          <Input
-            id="amount"
-            type="number"
-            min="0"
-            step="0.01"
-            value={formData.amount}
-            onChange={(e) => handleChange("amount", e.target.value)}
-            placeholder="e.g., 150.00"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">What happened? *</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => handleChange("description", e.target.value)}
-          placeholder="Please describe what happened in detail (minimum 40 characters)..."
-          className={errors.description ? "border-red-500" : ""}
-          rows={5}
-        />
-        <div className="flex justify-between">
-          {errors.description ? (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.description}
-            </p>
-          ) : (
-            <span />
-          )}
-          <p className="text-sm text-gray-500">
-            {formData.description.length} characters (minimum 40)
+    <section id="submit" className="section-padding bg-[#FAFAFA]">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-[#1E3A5F] sm:text-4xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            Submit a Complaint
+          </h2>
+          <p className="mt-4 text-lg text-[#4B5563]">
+            Fill out the form below and we'll get your complaint routed to the right place.
           </p>
         </div>
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="outcome">What outcome are you seeking? *</Label>
-          <select
-            id="outcome"
-            value={formData.outcome}
-            onChange={(e) => handleChange("outcome", e.target.value)}
-            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-              errors.outcome ? "border-red-500" : ""
-            }`}
-          >
-            <option value="">Select outcome</option>
-            {outcomeOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          {errors.outcome && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.outcome}
+        <form ref={formRef} onSubmit={handleSubmit} className="mt-12 space-y-6" noValidate>
+          {/* Full Name */}
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-[#1F2937]">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`input-field mt-1 ${errors.fullName && touched.fullName ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              placeholder="John Smith"
+              required
+            />
+            {errors.fullName && touched.fullName && (
+              <p className="mt-1 text-sm text-red-500">{errors.fullName}</p>
+            )}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-[#1F2937]">
+              Email Address <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`input-field mt-1 ${errors.email && touched.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              placeholder="john@example.com"
+              required
+            />
+            {errors.email && touched.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+            )}
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-[#1F2937]">
+              Phone Number <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`input-field mt-1 ${errors.phone && touched.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              placeholder="e.g., +44 7853 169761"
+              required
+            />
+            {errors.phone && touched.phone && (
+              <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+            )}
+          </div>
+
+          {/* Country */}
+          <div>
+            <label htmlFor="country" className="block text-sm font-medium text-[#1F2937]">
+              Country <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="country"
+              name="country"
+              value={formData.country}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`select-field mt-1 ${errors.country && touched.country ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              required
+            >
+              <option value="">Select your country</option>
+              {countries.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            {errors.country && touched.country && (
+              <p className="mt-1 text-sm text-red-500">{errors.country}</p>
+            )}
+          </div>
+
+          {/* Industry */}
+          <div>
+            <label htmlFor="industry" className="block text-sm font-medium text-[#1F2937]">
+              Industry / Category <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="industry"
+              name="industry"
+              value={formData.industry}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`select-field mt-1 ${errors.industry && touched.industry ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              required
+            >
+              <option value="">Select an industry</option>
+              {industries.map((i) => (
+                <option key={i.value} value={i.value}>
+                  {i.label}
+                </option>
+              ))}
+            </select>
+            {errors.industry && touched.industry && (
+              <p className="mt-1 text-sm text-red-500">{errors.industry}</p>
+            )}
+          </div>
+
+          {/* Company */}
+          <div className="relative">
+            <label htmlFor="company" className="block text-sm font-medium text-[#1F2937]">
+              Which company is your complaint about? <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="company"
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              onFocus={() => setShowSuggestions(true)}
+              className={`input-field mt-1 ${errors.company && touched.company ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              placeholder="Start typing company name..."
+              required
+              autoComplete="off"
+            />
+            {showSuggestions && filteredSuggestions.length > 0 && (
+              <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-[#E5E7EB] bg-white shadow-lg">
+                {filteredSuggestions.map((company) => (
+                  <li
+                    key={company}
+                    className="cursor-pointer px-4 py-2 text-sm text-[#1F2937] hover:bg-[#FAFAFA]"
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, company }));
+                      setShowSuggestions(false);
+                    }}
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
+                    {company}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {errors.company && touched.company && (
+              <p className="mt-1 text-sm text-red-500">{errors.company}</p>
+            )}
+          </div>
+
+          {/* Company Website */}
+          <div>
+            <label htmlFor="companyWebsite" className="block text-sm font-medium text-[#1F2937]">
+              Company website or contact page <span className="text-[#6B7280]">(optional)</span>
+            </label>
+            <input
+              type="url"
+              id="companyWebsite"
+              name="companyWebsite"
+              value={formData.companyWebsite}
+              onChange={handleChange}
+              className="input-field mt-1"
+              placeholder="https://example.com/contact"
+            />
+          </div>
+
+          {/* Reference */}
+          <div>
+            <label htmlFor="reference" className="block text-sm font-medium text-[#1F2937]">
+              Order / Booking / Voucher Reference <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="reference"
+              name="reference"
+              value={formData.reference}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`input-field mt-1 ${errors.reference && touched.reference ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              placeholder="e.g., ABC-123456"
+              required
+            />
+            {errors.reference && touched.reference && (
+              <p className="mt-1 text-sm text-red-500">{errors.reference}</p>
+            )}
+          </div>
+
+          {/* Date of Incident */}
+          <div>
+            <label htmlFor="dateOfIncident" className="block text-sm font-medium text-[#1F2937]">
+              Date of Incident <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              id="dateOfIncident"
+              name="dateOfIncident"
+              value={formData.dateOfIncident}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`input-field mt-1 ${errors.dateOfIncident && touched.dateOfIncident ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              required
+            />
+            {errors.dateOfIncident && touched.dateOfIncident && (
+              <p className="mt-1 text-sm text-red-500">{errors.dateOfIncident}</p>
+            )}
+          </div>
+
+          {/* Amount */}
+          <div>
+            <label htmlFor="amount" className="block text-sm font-medium text-[#1F2937]">
+              Amount involved <span className="text-[#6B7280]">(optional)</span>
+            </label>
+            <input
+              type="number"
+              id="amount"
+              name="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              className="input-field mt-1"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          {/* What happened */}
+          <div>
+            <label htmlFor="whatHappened" className="block text-sm font-medium text-[#1F2937]">
+              What happened? <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              id="whatHappened"
+              name="whatHappened"
+              value={formData.whatHappened}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`textarea-field mt-1 ${errors.whatHappened && touched.whatHappened ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              placeholder="Please describe what happened in detail (minimum 40 characters)..."
+              required
+              minLength={40}
+            />
+            <p className="mt-1 text-xs text-[#6B7280]">
+              {formData.whatHappened.trim().length}/40 characters
             </p>
-          )}
-        </div>
+            {errors.whatHappened && touched.whatHappened && (
+              <p className="mt-1 text-sm text-red-500">{errors.whatHappened}</p>
+            )}
+          </div>
 
-        <div className="space-y-2">
-          <Label>Have you already contacted the company? *</Label>
-          <RadioGroup
-            value={formData.contactedCompany}
-            onValueChange={(value) => handleChange("contactedCompany", value)}
-            className="flex gap-4"
-          >
-            {contactedOptions.map((option) => (
-              <div
-                key={option}
-                className="flex items-center space-x-2"
-              >
-                <RadioGroupItem value={option} id={`contacted-${option}`} />
-                <Label htmlFor={`contacted-${option}`} className="font-normal">
-                  {option}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-          {errors.contactedCompany && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5" /> {errors.contactedCompany}
-            </p>
-          )}
-        </div>
-      </div>
+          {/* Outcome */}
+          <div>
+            <label htmlFor="outcome" className="block text-sm font-medium text-[#1F2937]">
+              What outcome are you seeking? <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="outcome"
+              name="outcome"
+              value={formData.outcome}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`select-field mt-1 ${errors.outcome && touched.outcome ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              required
+            >
+              <option value="">Select an outcome</option>
+              {outcomes.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            {errors.outcome && touched.outcome && (
+              <p className="mt-1 text-sm text-red-500">{errors.outcome}</p>
+            )}
+          </div>
 
-      <div className="space-y-2">
-        <Label>Preferred Contact Method *</Label>
-        <RadioGroup
-          value={formData.preferredContact}
-          onValueChange={(value) => handleChange("preferredContact", value)}
-          className="flex gap-4"
-        >
-          {contactMethodOptions.map((option) => (
-            <div key={option} className="flex items-center space-x-2">
-              <RadioGroupItem value={option} id={`contact-method-${option}`} />
-              <Label htmlFor={`contact-method-${option}`} className="font-normal">
-                {option}
-              </Label>
+          {/* Contacted Company */}
+          <div>
+            <label className="block text-sm font-medium text-[#1F2937]">
+              Have you already contacted the company? <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-2 flex flex-wrap gap-4">
+              {contactStatuses.map((s) => (
+                <label key={s.value} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="contactedCompany"
+                    value={s.value}
+                    checked={formData.contactedCompany === s.value}
+                    onChange={handleChange}
+                    className="radio-field"
+                    required
+                  />
+                  <span className="text-sm text-[#1F2937]">{s.label}</span>
+                </label>
+              ))}
             </div>
-          ))}
-        </RadioGroup>
-        {errors.preferredContact && (
-          <p className="text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="h-3.5 w-3.5" /> {errors.preferredContact}
-          </p>
-        )}
+          </div>
+
+          {/* Preferred Contact Method */}
+          <div>
+            <label className="block text-sm font-medium text-[#1F2937]">
+              Preferred Contact Method <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-2 flex flex-wrap gap-4">
+              {contactMethods.map((m) => (
+                <label key={m.value} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="preferredContact"
+                    value={m.value}
+                    checked={formData.preferredContact === m.value}
+                    onChange={handleChange}
+                    className="radio-field"
+                    required
+                  />
+                  <span className="text-sm text-[#1F2937]">{m.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Consent */}
+          <div>
+            <label className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                name="consent"
+                checked={formData.consent}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className="checkbox-field mt-1"
+                required
+              />
+              <span className="text-sm text-[#1F2937]">
+                I confirm the information provided is accurate and I agree to be contacted about this complaint.{' '}
+                <span className="text-red-500">*</span>
+              </span>
+            </label>
+            {errors.consent && touched.consent && (
+              <p className="mt-1 text-sm text-red-500">{errors.consent}</p>
+            )}
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full rounded-lg bg-[#0D9488] px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-[#0A7A70] disabled:opacity-50"
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
+          </button>
+        </form>
       </div>
-
-      <div className="space-y-2">
-        <div className="flex items-start gap-3">
-          <Checkbox
-            checked={formData.consent}
-            onCheckedChange={(checked) => handleChange("consent", checked as boolean)}
-            id="consent"
-          />
-          <Label htmlFor="consent" className="font-normal">
-            I confirm the information provided is accurate and I agree to be
-            contacted about this complaint. *
-          </Label>
-        </div>
-        {errors.consent && (
-          <p className="text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="h-3.5 w-3.5" /> {errors.consent}
-          </p>
-        )}
-      </div>
-
-      {deliveryWarning && (
-        <div className="rounded-lg border border-amber/50 bg-amber/10 p-4 text-sm text-gray-800">
-          <p className="font-medium">We couldn't confirm delivery — please screenshot this reference.</p>
-        </div>
-      )}
-
-      <Button
-        type="submit"
-        disabled={submitting}
-        className="w-full bg-teal py-4 text-lg hover:bg-teal/90 text-white"
-      >
-        {submitting ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Submitting Complaint...
-          </>
-        ) : (
-          "Submit Complaint"
-        )}
-      </Button>
-    </form>
+    </section>
   );
 }

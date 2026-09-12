@@ -1,68 +1,58 @@
-import { Send, ClipboardCheck, Route, ChartNoAxesColumnIncreasing } from "lucide-react";
+import { Circle, Line } from 'lucide-react';
 
-const steps = [
-  {
-    number: 1,
-    title: "Tell us which company and what happened",
-    description: "Share the details of your complaint and the company involved.",
-    icon: Send,
-  },
-  {
-    number: 2,
-    title: "Receive your unique case reference",
-    description: "Get a case reference you can use to track your complaint.",
-    icon: ClipboardCheck,
-  },
-  {
-    number: 3,
-    title: "We route your complaint to the correct company",
-    description: "We help direct your complaint to the right place for review.",
-    icon: Route,
-  },
-  {
-    number: 4,
-    title: "Track progress until resolution",
-    description: "Follow your case progress until a resolution is reached.",
-    icon: ChartNoAxesColumnIncreasing,
-  },
-];
-
-export function HowItWorks() {
+export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="section-padding bg-gray-50">
-      <div className="container-custom">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl font-Poppins">
+    <section id="how-it-works" className="section-padding">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-[#1E3A5F] sm:text-4xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
             How It Works
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
-            A simple, transparent process to help your complaint reach the right company.
+          <p className="mt-4 text-lg text-[#4B5563]">
+            Simple, transparent process to get your complaint heard and resolved.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-4">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <div key={step.number} className="relative">
-                {index < steps.length - 1 && (
-                  <div className="absolute left-8 top-10 z-0 hidden h-0.5 w-full bg-teal/30 md:block" />
-                )}
-                <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-md border-2 border-teal/20">
-                    <span className="text-2xl font-bold text-teal">{step.number}</span>
-                  </div>
-                  <div className="mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-teal/10 text-teal">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="mt-3 text-lg font-semibold text-gray-900 font-Poppins">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-gray-600">{step.description}</p>
+        <div className="mt-12 relative">
+          <div className="absolute inset-0 w-0.5 bg-[#0D9488]/20" />
+          <div className="relative grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                number: 1,
+                title: 'Tell us which company and what happened',
+                description: 'Fill out our simple form with your details, the company name, and what happened.',
+              },
+              {
+                number: 2,
+                title: 'Receive your unique case reference',
+                description: 'Get an instant case reference (e.g., CB-2609-48213) to track your complaint.',
+              },
+              {
+                number: 3,
+                title: 'We route your complaint to the correct company',
+                description: 'We forward your complaint to the right department at the company.',
+              },
+              {
+                number: 4,
+                title: 'Track progress until resolution',
+                description: 'Use your case reference to check status and get updates until resolved.',
+              },
+            ].map((step, index) => (
+              <div
+                key={step.number}
+                className="relative flex items-start gap-4"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[#0D9488] text-white flex-shrink-0">
+                  {step.number}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-[#1E3A5F]">{step.title}</h3>
+                  <p className="mt-2 text-sm text-[#4B5563]">{step.description}</p>
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,14 +1,21 @@
-import { Handshake } from "lucide-react";
+import { Handshake } from 'lucide-react';
 
-export function BrandLogo() {
+interface BrandLogoProps {
+  className?: string;
+  showText?: boolean;
+}
+
+export function BrandLogo({ className = '', showText = true }: BrandLogoProps) {
   return (
-    <a href="#home" className="flex items-center gap-2 group" aria-label="ComplaintBridge Home">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-colors group-hover:bg-secondary">
-        <Handshake className="h-5 w-5" />
-      </div>
-      <span className="text-xl font-bold tracking-tight text-primary font-Poppins">
-        ComplaintBridge
-      </span>
-    </a>
+    <div className={`flex items-center gap-2 ${className}`}>
+      <Handshake className="h-8 w-8 text-[#0D9488]" aria-hidden="true" />
+      {showText && (
+        <span className="text-xl font-bold text-[#1E3A5F]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          ComplaintBridge
+        </span>
+      )}
+    </div>
   );
 }
+
+export default BrandLogo;
