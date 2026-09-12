@@ -44,6 +44,14 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        teal: {
+          DEFAULT: "#0D9488",
+          foreground: "#ffffff",
+        },
+        amber: {
+          DEFAULT: "#F59E0B",
+          foreground: "#1f2937",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",

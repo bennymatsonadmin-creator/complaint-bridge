@@ -71,6 +71,31 @@ function generateCaseReference(): string {
   return `CB-${year}${month}-${random}`;
 }
 
+// sessionStorage can throw (e.g. SecurityError in sandboxed iframes) — never let it crash rendering
+function safeGetItem(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+function safeRemoveItem(key: string): void {
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 function validateEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -81,7 +106,7 @@ function validatePhone(phone: string): boolean {
 
 export function ComplaintForm() {
   const [formData, setFormData] = useState<FormData>(() => {
-    const saved = sessionStorage.getItem("complaintBridgeForm");
+    const saved = safeGetItem("complaintBridgeForm");
     if (saved) {
       try {
         return { ...initialFormData, ...JSON.parse(saved) };
@@ -99,7 +124,7 @@ export function ComplaintForm() {
   const [companySuggestions, setCompanySuggestions] = useState<string[]>([]);
 
   useEffect(() => {
-    const savedRef = sessionStorage.getItem("complaintBridgeCaseReference");
+    const savedRef = safeGetItem("complaintBridgeCaseReference");
     if (savedRef) {
       setCaseReference(savedRef);
       setSubmitted(true);
@@ -115,7 +140,7 @@ export function ComplaintForm() {
   }, [formData.industry]);
 
   useEffect(() => {
-    sessionStorage.setItem("complaintBridgeForm", JSON.stringify(formData));
+    safeSetItem("complaintBridgeForm", JSON.stringify(formData));
   }, [formData]);
 
   const selectedIndustryName = useMemo(() => {
@@ -191,7 +216,7 @@ export function ComplaintForm() {
 
     const reference = generateCaseReference();
     setCaseReference(reference);
-    sessionStorage.setItem("complaintBridgeCaseReference", reference);
+    safeSetItem("complaintBridgeCaseReference", reference);
 
     const payload = {
       ...formData,
@@ -232,8 +257,8 @@ export function ComplaintForm() {
     setSubmitted(false);
     setCaseReference("");
     setDeliveryWarning(false);
-    sessionStorage.removeItem("complaintBridgeCaseReference");
-    sessionStorage.removeItem("complaintBridgeForm");
+    safeRemoveItem("complaintBridgeCaseReference");
+    safeRemoveItem("complaintBridgeForm");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
